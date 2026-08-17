@@ -1,0 +1,30 @@
+%{
+#include<stdio.h>
+#include<stdlib.h>
+
+int comment_count = 0;
+FILE *output;
+%}
+
+%%
+"/*"([^*]|\*+[^*/])*"*/"  { comment_count++; }  
+"//".*                    { comment_count++; }  
+.|
+\n                        { fputc(yytext[0], output); }
+%%
+
+int main()
+{
+    FILE *input = fopen("input.c", "r");
+    output = fopen("output.c", "w");
+    if (!input || !output) {
+        printf("Error opening files!\n");
+        return 1;
+    }
+    yyin = input;
+    yylex();
+    fclose(input);
+    fclose(output);
+    printf("Number of comment lines removed: %d\n", comment_count);
+    return 0;
+}
